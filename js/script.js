@@ -1,8 +1,9 @@
 const loginBtn = document.getElementById('show-login');
 const registerBtn = document.getElementById('show-register');
 
-const loginForm = document.getElementById('login-form');
-const registerForm = document.getElementById('registration-form');
+//links to the div containing both forms
+const loginForm = document.getElementById('login-toggle');
+const registerForm = document.getElementById('register-toggle');
 
 //toggle to login form
 loginBtn.addEventListener('click', () => {
@@ -11,6 +12,7 @@ loginBtn.addEventListener('click', () => {
     loginBtn.classList.add('active');
     registerBtn.classList.remove('active');
 });
+//switches to the registration form
 registerBtn.addEventListener('click', () => {
     registerForm.classList.add('active');
     loginForm.classList.remove('active')
