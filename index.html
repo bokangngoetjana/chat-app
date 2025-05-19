@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bokang's Chat App - Login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="stylesheet" href="styles/styles.css"/>
+    </head>
+    <body>
+        <div class="container">
+            <div id="welcome" class="welcome">
+                <!--Logo/Welcome text will go here-->
+            </div>
+            <div class="auth-form">
+                <div class="form-toggle">
+                    <button id="show-login" class="active">Login</button>
+                    <button id="show-register">Register</button>
+                </div>
+
+                <!--Login Form-->
+                <form id="login-form">
+                    <h2 class="form-title">Login</h2>
+                    <div class="form-group">
+                        <label for="login-username" class="login-username" placeholder="username">Username:</label>
+                        <input id="login-username" type="text" required/>
+                    </div>
+                    <div class="form-group">
+                        <label id="login-password" class="input">Password:</label>
+                        <input type="password" id="login-password" required />
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+
+                <!--Registration Form-->
+               <!--<form id="registration-form">
+                    <h2 class="form-title">Register</h2>
+                    <div class="form-group">
+                        <label id="email" class="email">Email:</label>
+                        <input id="email" type="email" required/>
+                    </div>
+                    <div class="form-group">
+                        <label id="reg-password" class="input">Password:</label>
+                        <input type="password" id="reg-password" required />
+                    </div>
+                   <div class="form-group">
+                        <label id="confirm-pwd" class="input" value="Password">Confirm Password:</label>
+                        <input type="password" id="confirm-pwd" required />
+                   </div>
+                    <button type="submit">Register</button>
+                </form> --> 
+            </div>
+        </div>
+        <script src="js/script.js"></script>
+    </body>
+    <footer></footer>
+</html>
