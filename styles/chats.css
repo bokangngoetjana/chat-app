@@ -85,6 +85,7 @@ body {
 /* Chat Header */
 .chat-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 1rem;
     background: #5a2a7f;
@@ -92,6 +93,30 @@ body {
     border-bottom: 1px solid #ccc;
 }
 
+.side-details{
+    align-items: center;
+    display: flex;
+    gap: 10px;;
+}
+.user-profile{
+    cursor: pointer;
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid white;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+#logoutBtn{
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+#logoutBtn:hover {
+    background-color: #e0d3ee;
+}
 .profile-details h4 {
     font-size: 1.1rem;
     margin-bottom: 3px;

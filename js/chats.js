@@ -1,7 +1,7 @@
 const submitBtn = document.getElementById('submit-btn');
 const messageInput = document.getElementById('message-input');
 const chatMessages = document.getElementById('chat-messages');
-
+const logoutBtn = document.getElementById('logoutBtn');
 //load messages from local storage
 let messages = JSON.parse(localStorage.getItem('messages')) || [];
 
@@ -9,6 +9,11 @@ let messages = JSON.parse(localStorage.getItem('messages')) || [];
 function getTimes(){
     const now = new Date();
     return now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+}
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+if (!currentUser) {
+  window.location.href = "login.html";
 }
 
 //render messages
@@ -25,6 +30,10 @@ function renderMessages(){
     // Scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem("currentUser");  // Correct method
+    window.location.href = "/index.html";     // Redirect after logout
+});
 
 //send messages
 submitBtn.addEventListener('click', () => {
