@@ -5,19 +5,18 @@
         <link rel="stylesheet" href="/styles/profile.css"/>
     </head>
     <body>
-        <div class="container">
-            <div class="username-section">
-                <h3 class="usernames">Bokang Ngoetjana</h3>
-                <p class="email">bokang-n@gmail.com</p>
+        <div class="profile-container">
+            <h2>User Profile</h2>
+            <div class="profile-details">
+                <p><strong>Name: </strong> <span id="firstName"></span></p>
+                <p><strong>Email: </strong> <span id="lastName"></span></p>
+                <p><strong>Email (Username):</strong> <input type="text" id="emailInput"></p>
+                <button id="updateBtn">Update Username</button>
             </div>
-            <div class="user-details">
-                <label class="name">Name</label>
-                <input id="name" disabled/>
-            </div>
-            <div class="contact">
-                
-            </div>
+            <a href="chats.html" id="back">Back to Chats</button>
         </div>
+
+        <script src="/js/profile.js"></script>
     </body>
     <footer>
     </footer>
