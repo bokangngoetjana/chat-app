@@ -1,28 +1,32 @@
 const loginBtn = document.getElementById('show-login');
 const registerBtn = document.getElementById('show-register');
-
-//links to the div containing both forms
 const loginForm = document.getElementById('login-toggle');
 const registerForm = document.getElementById('register-toggle');
 
-//toggle to login form
 loginBtn.addEventListener('click', () => {
     loginForm.classList.add('active');
     registerForm.classList.remove('active');
     loginBtn.classList.add('active');
     registerBtn.classList.remove('active');
 });
-//switches to the registration form
+
 registerBtn.addEventListener('click', () => {
     registerForm.classList.add('active');
-    loginForm.classList.remove('active')
+    loginForm.classList.remove('active');
     registerBtn.classList.add('active');
-    loginBtn.classList.remove('active')
-})
+    loginBtn.classList.remove('active');
+});
 
-//registration logic
-//adds a submit event listener, and prevents the form from refreshing when submitted.
-document.getElementById('registration-form').addEventListener('submit', function(e) {
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+document.getElementById('registration-form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const email = document.getElementById('email').value;
@@ -31,50 +35,53 @@ document.getElementById('registration-form').addEventListener('submit', function
     const password = document.getElementById('reg-password').value;
     const confirmPwd = document.getElementById('confirm-pwd').value;
 
-    if(password !== confirmPwd){
+    if (password !== confirmPwd) {
         alert('Passwords do not match!');
         return;
     }
-    const username = email;
-    const users = JSON.parse(localStorage.getItem('users')) || [];
 
-  const userExists = users.some(user => user.email === email);
-if (userExists) {
-    alert('User already exists.');
-    return;
-}
-   users.push({
-    email,
-    firstName,
-    lastName,
-    password
-});
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const userExists = users.some(user => user.email === email);
+
+    if (userExists) {
+        alert('User already exists.');
+        return;
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    users.push({
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword
+    });
 
     localStorage.setItem('users', JSON.stringify(users));
     alert('Registration successful! You can now log in.');
-
     loginBtn.click();
 });
-//Login logic
-document.getElementById('login-form').addEventListener('submit', function(e) {
+
+document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
 
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
-
     const users = JSON.parse(localStorage.getItem('users')) || [];
 
     const user = users.find(user => user.email === username);
-if (!user) {
-    alert('User does not exist.');
-    return;
-}
 
-    if (user.password !== password) {
-    alert('Incorrect password.');
-    return;
-}
+    if (!user) {
+        alert('User does not exist.');
+        return;
+    }
 
+    const hashedPassword = await hashPassword(password);
+
+    if (user.password !== hashedPassword) {
+        alert('Incorrect password.');
+        return;
+    }
 
     localStorage.setItem('currentUser', JSON.stringify(user));
     alert('Login successful!');
