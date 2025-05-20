@@ -6,56 +6,17 @@
     </head>
     <body>
         <div class="container">
-            <div class="message-list sidebar" id="sidebar">
+            <div class="message-list">
                 <div class="sidebar-header">
                     <h2>Messages</h2>
+                    <select id="user-filter">
+                        <option value="all">All Users</option>
+                        <option value="online">Online Only</option>
+                    </select>
                 </div>
-
-                <ul class="chat-list">
-                   
-                    <li class="message-item">
-                        <!--<div class="profile-picture">B</div> -->
-                        <div class="message-info">
-                            <h4 class="user-email">Bokang</h4>
-                            <p>What are you up to?</p>
-                        </div>
-                    </li>
-                    <li class="message-item">
-                        <!--<img src="#" alt="profile-picture"/>-->
-                        <div class="message-info">
-                            <h4>Leigh</h4>
-                            <p>Are you busy?</p>
-                        </div>
-                    </li>
-                    <li class="message-item">
-                        <!--<div class="profile-picture">B</div> -->
-                        <div class="message-info">
-                            <h4>Kayleen</h4>
-                            <p>Let's hangout</p>
-                        </div>
-                    </li>
-                    <li class="message-item">
-                        <!--<div class="profile-picture">B</div> -->
-                        <div class="message-info">
-                            <h4>Murray</h4>
-                            <p>Hey</p>
-                        </div>
-                    </li>
-                    <li class="message-item">
-                        <!--<div class="profile-picture">B</div> -->
-                        <div class="message-info">
-                            <h4>Lerato</h4>
-                            <p>You good?</p>
-                        </div>
-                    </li>
-                    <li class="message-item">
-                        <!--<div class="profile-picture">B</div> -->
-                        <div class="message-info">
-                            <h4>Lerato</h4>
-                            <p>You good?</p>
-                        </div>
-                    </li>
-                </ul>
+                <div class="sidebar" id="sidebar">
+                    
+                </div>
             </div>
             <div class="selected-chat">
                <div class="chat-header">
@@ -70,9 +31,7 @@
                 </div>
 
                 <div class="chat-messages" id="chat-messages">
-                    <!--<div class="received">Hey!</div>
-                    <div class="sent">Hey! How are you?</div>
-                    <div class="received">I'm okay</div>-->
+                    
                 </div>
                 <div class="chat-input">
                     <input type="text" placeholder="Type a message..." id="message-input"/>
