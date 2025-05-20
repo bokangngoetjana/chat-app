@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>All Messages</title>
+        <link rel="stylesheet" href="/styles/chats.css"/>
+    </head>
+    <body>
+        <div class="container">
+            <div class="message-list sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>Messages</h2>
+                </div>
+
+                <ul class="chat-list">
+                   
+                    <li class="message-item">
+                        <!--<div class="profile-picture">B</div> -->
+                        <div class="message-info">
+                            <h4 class="user-email">Bokang</h4>
+                            <p>What are you up to?</p>
+                        </div>
+                    </li>
+                    <li class="message-item">
+                        <!--<img src="#" alt="profile-picture"/>-->
+                        <div class="message-info">
+                            <h4>Leigh</h4>
+                            <p>Are you busy?</p>
+                        </div>
+                    </li>
+                    <li class="message-item">
+                        <!--<div class="profile-picture">B</div> -->
+                        <div class="message-info">
+                            <h4>Kayleen</h4>
+                            <p>Let's hangout</p>
+                        </div>
+                    </li>
+                    <li class="message-item">
+                        <!--<div class="profile-picture">B</div> -->
+                        <div class="message-info">
+                            <h4>Murray</h4>
+                            <p>Hey</p>
+                        </div>
+                    </li>
+                    <li class="message-item">
+                        <!--<div class="profile-picture">B</div> -->
+                        <div class="message-info">
+                            <h4>Lerato</h4>
+                            <p>You good?</p>
+                        </div>
+                    </li>
+                    <li class="message-item">
+                        <!--<div class="profile-picture">B</div> -->
+                        <div class="message-info">
+                            <h4>Lerato</h4>
+                            <p>You good?</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="selected-chat">
+               <div class="chat-header">
+                    <div class="profile-details">
+                        <h4 class="current-user-email">Bokang</h4>
+                        <p>online</p>
+                    </div>
+                    <div class="side-details">
+                        <label id="profileIcon" class="user-profile">Profile</label>
+                        <button id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chat-messages">
+                    <!--<div class="received">Hey!</div>
+                    <div class="sent">Hey! How are you?</div>
+                    <div class="received">I'm okay</div>-->
+                </div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Type a message..." id="message-input"/>
+                    <button type="submit" id="submit-btn">Send</button>
+                </div>
+            </div>
+        </div>
+        <script src="/js/chats.js"></script>
+    </body>
+    <footer>
+        
+    </footer>
+</html>

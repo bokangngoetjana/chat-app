@@ -65,7 +65,7 @@ body{
     border-radius: 8px;
     font-size: 1rem;
     background-color: #fefbff;
-    color: #fff;
+    color: #000;
 }
 .form-group label{
     flex: 1;
