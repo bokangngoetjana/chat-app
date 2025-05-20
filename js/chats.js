@@ -1,133 +1,158 @@
+
 const submitBtn = document.getElementById('submit-btn');
 const messageInput = document.getElementById('message-input');
 const chatMessages = document.getElementById('chat-messages');
 const logoutBtn = document.getElementById('logoutBtn');
-
 const usernameDisplay = document.querySelector('.profile-details h4');
 const sidebar = document.getElementById('sidebar');
-//load messages from local storage
+const filterDropdown = document.getElementById('user-filter');
+
+
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+let selectedContact = null;
+let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
 let messages = JSON.parse(localStorage.getItem('messages')) || [];
 
+let usersData = localStorage.getItem("users");
+let users = [];
 
-const contacts = [
-  {name: 'Leigh', online: true},
-  {name: 'Lerato', online: false},
-  {name: 'Kayleen', online: false},
-  {name: 'Murray', online: true},
-  {name: 'Lesedi', online: false}
-]
-
-function renderSidebar(){
-    sidebar.innerHTML = '';
-
-    const filter = document.getElementById('user-filter')?.value || 'all';
-    const filteredContacts = contacts.filter(contact => {
-    return filter === 'online' ? contact.online : true;
-  });
-
-
-    filteredContacts.forEach(contacts => {
-        const item = document.createElement('div');
-        item.classList.add('message-item');
-        item.innerHTML =  `
-         <img src="images/avatar.jpg" alt="">
-      <div class="message-content">
-        <div class="message-header">
-          <h4>${contacts.name} ${contacts.online ? '<span style="color:green;">●</span>' : ''}</h4>
-          <span>12:15</span>
-        </div>
-        <p>Tap to open chat</p>
-      </div>
-        `;
-        item.addEventListener('click', () => {
-            selectedContact = contacts.name;
-            renderChatHeader(contacts.name);
-            renderMessages();
-        });
-        sidebar.appendChild(item);
-    })
-}
-const filterDropdown = document.getElementById('user-filter');
-if (filterDropdown) {
-  filterDropdown.addEventListener('change', renderSidebar);
+try {
+  users = JSON.parse(usersData);
+  if (!Array.isArray(users)) {
+    users = [];
+  }
+} catch (e) {
+  users = [];
 }
 
-function renderChatHeader(name) {
-  usernameDisplay.innerText = name;
-}
-//function for time stamps on text messages
-function getTimes(){
-    const now = new Date();
-    return now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-}
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+const contacts = users.filter(user => user.email !== currentUser.email).map(user => ({name: user.firstName, email: user.email, online: true}));
+
 
 if (!currentUser) {
   window.location.href = "/index.html";
 }
 document.querySelector('.current-user-email').innerText = currentUser.email;
 
-let selectedContact = null;
-let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
-
-
-//render messages
-function renderMessages(){
-    const chatKey = currentUser.email;
-    const userChats = allChats[chatKey] || {};
-    const messages = userChats[selectedContact] || [];
-
-    chatMessages.innerHTML = '';
-    messages.forEach(msg => {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add(msg.type);
-        msgDiv.innerHTML = `
-        <p>${msg.text}</p>
-        <span class="timestamp">${msg.time}</span>`;
-        chatMessages.appendChild(msgDiv);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+//Event listeners
+if (filterDropdown) {
+  filterDropdown.addEventListener('change', renderSidebar);
 }
-logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem("currentUser");  // Correct method
-    window.location.href = "/index.html";     // Redirect after logout
-});
 
-//send messages
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem("currentUser");
+    window.location.href = "/index.html";
+  });
+}
+
+
+
 submitBtn.addEventListener('click', () => {
-    const text = messageInput.value.trim();
-    if(!text || !selectedContact) return;
+  const text = messageInput.value.trim();
+  if (!text || !selectedContact) return;
 
-    const chatKey = currentUser.email;
-    allChats[chatKey] = allChats[chatKey] || {};
-    allChats[chatKey][selectedContact] = allChats[chatKey][selectedContact] || [];
+  //save messages for both users
+  const sender = currentUser.email;
+  const receiver = selectedContact;
 
-    allChats[chatKey][selectedContact].push({
-        type: 'sent',
-        text: text,
-        time: getTimes()
-    });
+  allChats[sender] = allChats[sender] || {};
+  allChats[sender][receiver] = allChats[sender][receiver] || [];
 
-    //auto reply
-    setTimeout(() => {
-        allChats[chatKey][selectedContact].push({
-            text: 'Got it!',
-            type: 'received',
-            time: getTimes()
-        });
-        localStorage.setItem('allChats', JSON.stringify(allChats));
-        renderMessages();
-    }, 1000);
-    localStorage.setItem('allChats', JSON.stringify(allChats));
-    messageInput.value = '';
-    renderMessages();
+  allChats[receiver] = allChats[receiver] || {};
+  allChats[receiver][sender] = allChats[receiver][sender] || [];
+
+  const time = getTimes();
+  const messageObj = {
+    text: text,
+    time: time
+  };
+
+  allChats[sender][receiver].push({
+    ...messageObj,
+    type: 'sent'
+  });
+  
+  allChats[receiver][sender].push({
+    ...messageObj,
+    type: 'received'
+  });
+  
+  localStorage.setItem('allChats', JSON.stringify(allChats));
+  messageInput.value = '';
+  renderMessages();
 });
-// Default to first contact
+
+//Render functions
+
+function renderSidebar() {
+  sidebar.innerHTML = '';
+  const filter = filterDropdown?.value || 'all';
+
+  const filteredContacts = contacts.filter(contact =>
+    filter === 'online' ? contact.online : true
+  );
+
+  filteredContacts.forEach(contact => {
+    const item = document.createElement('div');
+    item.classList.add('message-item');
+    item.innerHTML = `
+      <img src="images/avatar.jpg" alt="">
+      <div class="message-content">
+        <div class="message-header">
+          <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
+          <span>12:15</span>
+        </div>
+        <p>Tap to open chat</p>
+      </div>
+    `;
+    item.addEventListener('click', () => {
+      selectedContact = contact.email;
+      renderChatHeader(contact.name);
+      renderMessages();
+    });
+    sidebar.appendChild(item);
+  });
+}
+
+
+function renderChatHeader(name) {
+  usernameDisplay.innerText = name;
+}
+
+
+function renderMessages() {
+  const chatKey = currentUser.email;
+  const userChats = allChats[chatKey] || {};
+  const messages = userChats[selectedContact] || [];
+
+  chatMessages.innerHTML = '';
+  messages.forEach(msg => {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add(msg.type);
+    msgDiv.innerHTML = `
+      <p>${msg.text}</p>
+      <span class="timestamp">${msg.time}</span>
+    `;
+    chatMessages.appendChild(msgDiv);
+  });
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function getTimes() {
+  const now = new Date();
+  return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+
 window.onload = () => {
   renderSidebar();
-  selectedContact = contacts[0];
-  renderChatHeader(selectedContact);
+
+  if (contacts.length > 0) {
+  selectedContact = contacts[0].email;
+  renderChatHeader(contacts[0].name);
+}
+
   renderMessages();
 };
-
-renderMessages();
