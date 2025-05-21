@@ -56,13 +56,6 @@ submitBtn.addEventListener('click', () => {
 
   //save messages for both users in allChats
   const sender = currentUser.email;
-  const receiver = selectedContact;
-
-  allChats[sender] = allChats[sender] || {};
-  allChats[sender][receiver] = allChats[sender][receiver] || [];
-
-  allChats[receiver] = allChats[receiver] || {};
-  allChats[receiver][sender] = allChats[receiver][sender] || [];
 
   const time = getTimes();
   const messageObj = {
@@ -70,16 +63,41 @@ submitBtn.addEventListener('click', () => {
     time: time
   };
 
-  allChats[sender][receiver].push({
-    ...messageObj,
-    type: 'sent'
+  const groups = JSON.parse(localStorage.getItem('groups')) || {};
+
+  if(groups[selectedContact]){
+    const group = groups[selectedContact];
+  
+
+  group.members.forEach(member => {
+    allChats[member] = allChats[member] || {};
+    allChats[member][selectedContact] = allChats[member][selectedContact] || [];
+
+    allChats[member][selectedContact].push({
+      ...messageObj,
+      type: member === sender ? 'sent' : 'received',
+      senderName: currentUser.firstName
+    });
   });
+}else{
+  const receiver = selectedContact;
+  
+  allChats[sender] = allChats[sender] || {};
+  allChats[sender][receiver] = allChats[sender][receiver] || [];
+
+  allChats[receiver] = allChats[receiver] || {};
+  allChats[receiver][sender] = allChats[receiver][sender] || [];
+
+   allChats[sender][receiver].push({
+      ...messageObj,
+      type: 'sent'
+    });
   
   allChats[receiver][sender].push({
     ...messageObj,
     type: 'received'
   });
-  
+} 
   localStorage.setItem('allChats', JSON.stringify(allChats));
   messageInput.value = '';
   renderMessages();
@@ -115,6 +133,29 @@ function renderSidebar() {
     });
     sidebar.appendChild(item);
   });
+  //group chat logic
+  const groups = JSON.parse(localStorage.getItem('groups')) || {};
+  Object.entries(groups).forEach(([groupId, group]) => {
+    if(group.members.includes(currentUser.email)){
+      const item = document.createElement('div');
+      item.classList.add('message-item');
+      item.innerHTML = `
+       <img src="assets/group-icon.png" alt="">
+        <div class="message-content">
+          <div class="message-header">
+            <h4>${group.name}</h4>
+          </div>
+          <p>Tap to open group</p>
+        </div>
+      `;
+      item.addEventListener('click', () => {
+        selectedContact = groupId;
+        renderChatHeader(group.name);
+        renderMessages();
+      });
+      sidebar.appendChild(item);
+    }
+  })
 }
 
 
@@ -127,15 +168,20 @@ function renderMessages() {
   const chatKey = currentUser.email;
   const userChats = allChats[chatKey] || {};
   const messages = userChats[selectedContact] || [];
+  const groups = JSON.parse(localStorage.getItem('groups')) || {};
+  const isGroup = !!groups[selectedContact];
 
   chatMessages.innerHTML = '';
+
   messages.forEach(msg => {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add(msg.type);
+
     msgDiv.innerHTML = `
-      <p>${msg.text}</p>
-      <span class="timestamp">${msg.time}</span>
-    `;
+  <p>${isGroup && msg.senderName ? `<strong>${msg.senderName}:</strong> ` : ''}${msg.text}</p>
+  <span class="timestamp">${msg.time}</span>
+`;
+
     chatMessages.appendChild(msgDiv);
   });
 
@@ -158,3 +204,74 @@ window.onload = () => {
 
   renderMessages();
 };
+const createGroupBtn = document.getElementById('create-group-btn');
+const groupModal = document.getElementById('group-modal');
+const groupNameInput = document.getElementById('group-name');
+const groupMembersDiv = document.getElementById('group-members');
+const confirmGroupBtn = document.getElementById('confirm-group');
+const cancelGroupBtn = document.getElementById('cancel-group');
+
+// Show the group modal
+// Show modal
+createGroupBtn.addEventListener('click', () => {
+  groupNameInput.value = '';
+  groupMembersDiv.innerHTML = '';
+
+  contacts.forEach(contact => {
+    const checkbox = document.createElement('div');
+    checkbox.innerHTML = `
+      <label>
+        <input type="checkbox" value="${contact.email}"> ${contact.name}
+      </label>
+    `;
+    groupMembersDiv.appendChild(checkbox);
+  });
+
+  groupModal.style.display = 'flex';
+});
+
+
+// Cancel button hides modal
+cancelGroupBtn.addEventListener('click', () => {
+  groupModal.style.display = 'none';
+});
+
+// Confirm group creation
+confirmGroupBtn.addEventListener('click', () => {
+  const groupName = groupNameInput.value.trim();
+  const checkedBoxes = groupMembersDiv.querySelectorAll('input[type="checkbox"]:checked');
+
+  if (!groupName) {
+    alert("Please enter a group name.");
+    return;
+  }
+
+  const selectedEmails = Array.from(checkedBoxes).map(cb => cb.value);
+
+  if (selectedEmails.length === 0) {
+    alert("Select at least one member.");
+    return;
+  }
+  selectedEmails.push(currentUser.email);
+  const groupId = `group_${Date.now()}`;
+  const groupMembers = [...selectedEmails, currentUser.email];
+
+  groupMembers.forEach(member => {
+    allChats[member] = allChats[member] || {};
+    allChats[member][groupId] = allChats[member][groupId] || [];
+  });
+
+  localStorage.setItem('allChats', JSON.stringify(allChats));
+
+  // Save group info separately if needed
+  let groups = JSON.parse(localStorage.getItem('groups')) || {};
+  groups[groupId] = {
+    name: groupName,
+    members: groupMembers
+  };
+  localStorage.setItem('groups', JSON.stringify(groups));
+
+  groupModal.style.display = 'none';
+  groupNameInput.value = '';
+  renderSidebar(); // refresh sidebar to show the new group
+});
