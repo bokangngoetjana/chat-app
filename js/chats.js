@@ -6,10 +6,10 @@ const usernameDisplay = document.querySelector('.profile-details h4');
 const sidebar = document.getElementById('sidebar');
 const filterDropdown = document.getElementById('user-filter');
 
-const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
 
 let selectedContact = null;
-let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
+let allChats = JSON.parse(sessionStorage.getItem('allChats')) || JSON.parse(localStorage.getItem('allChats')) || {};
 let messages = JSON.parse(localStorage.getItem('messages')) || [];
 
 /* code for loading all users that are registered */
@@ -27,12 +27,13 @@ try {
 
 // remove currently signed in user from contacts
 const contacts = users.filter(user => user.email !== currentUser.email)
-  .map(user => ({ name: user.firstName, email: user.email, online: true }));
+  .map(user => ({ name: user.firstName, email: user.email, online: sessionStorage.getItem(user.email) ? true  :false }));
 
 if (!currentUser) {
   window.location.href = "/index.html";
 }
 document.querySelector('.current-user-email').innerText = currentUser.email;
+sessionStorage.setItem(currentUser.email, 'online');
 
 if (filterDropdown) {
   filterDropdown.addEventListener('change', renderSidebar);
@@ -40,7 +41,8 @@ if (filterDropdown) {
 
 if (logoutBtn) {
   logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem("currentUser");
+    sessionStorage.removeItem("currentUser");
+    sessionStorage.removeItem(currentUser.email);
     window.location.href = "/index.html";
   });
 }
@@ -72,7 +74,7 @@ submitBtn.addEventListener('click', () => {
       });
     });
 
-    localStorage.setItem('allChats', JSON.stringify(allChats));
+    sessionStorage.setItem('allChats', JSON.stringify(allChats));
     messageInput.value = '';
     renderMessages();
     return; // 🔥 this line prevents private message logic from also running
@@ -95,7 +97,7 @@ submitBtn.addEventListener('click', () => {
       type: 'received'
     });
 
-    localStorage.setItem('allChats', JSON.stringify(allChats));
+    sessionStorage.setItem('allChats', JSON.stringify(allChats));
     messageInput.value = '';
     renderMessages();
   }
@@ -257,7 +259,7 @@ confirmGroupBtn.addEventListener('click', () => {
     allChats[member][groupId] = allChats[member][groupId] || [];
   });
 
-  localStorage.setItem('allChats', JSON.stringify(allChats));
+  sessionStorage.setItem('allChats', JSON.stringify(allChats));
 
   let groups = JSON.parse(localStorage.getItem('groups')) || {};
   groups[groupId] = {
