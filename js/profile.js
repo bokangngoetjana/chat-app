@@ -1,4 +1,4 @@
-const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
 const users = JSON.parse(localStorage.getItem("users")) || {};
 
 if(!currentUser){
@@ -27,7 +27,7 @@ document.getElementById("updateBtn").addEventListener("click", () => {
   delete users[currentUser.email];
 
   localStorage.setItem("users", JSON.stringify(users));
-  localStorage.setItem("currentUser", JSON.stringify(users[newEmail]));
+  sessionStorage.setItem("currentUser", JSON.stringify(users[newEmail]));
 
   alert("Username updated successfully!");
   window.location.reload();
