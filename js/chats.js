@@ -289,7 +289,7 @@ window.onload = () => {
     logoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem("currentUser");
       sessionStorage.removeItem(currentUser.email);
-      window.location.href = "./index.html";
+      window.location.href = "../index.html";
     });
   }
 
