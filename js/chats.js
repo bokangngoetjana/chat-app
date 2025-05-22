@@ -9,154 +9,17 @@ const filterDropdown = document.getElementById('user-filter');
 const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
 
 let selectedContact = null;
-let allChats = JSON.parse(sessionStorage.getItem('allChats')) || JSON.parse(localStorage.getItem('allChats')) || {};
-let messages = JSON.parse(localStorage.getItem('messages')) || [];
 
-/* code for loading all users that are registered */
-let usersData = localStorage.getItem("users");
+// ✅ Now using ONLY localStorage for allChats
+let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
+
+// Users array & contacts list will be set inside onload to ensure proper scope
 let users = [];
+let contacts = [];
 
-try {
-  users = JSON.parse(usersData);
-  if (!Array.isArray(users)) {
-    users = [];
-  }
-} catch (e) {
-  users = [];
-}
-
-// remove currently signed in user from contacts
-const contacts = users.filter(user => user.email !== currentUser.email)
-  .map(user => ({ name: user.firstName, email: user.email, online: sessionStorage.getItem(user.email) ? true  :false }));
-
-if (!currentUser) {
-  window.location.href = "/index.html";
-}
-document.querySelector('.current-user-email').innerText = currentUser.email;
-sessionStorage.setItem(currentUser.email, 'online');
-
-if (filterDropdown) {
-  filterDropdown.addEventListener('change', renderSidebar);
-}
-
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-    sessionStorage.removeItem("currentUser");
-    sessionStorage.removeItem(currentUser.email);
-    window.location.href = "/index.html";
-  });
-}
-
-submitBtn.addEventListener('click', () => {
-  const text = messageInput.value.trim();
-  if (!text || !selectedContact) return;
-
-  const sender = currentUser.email;
-  const time = getTimes();
-  const messageObj = {
-    text: text,
-    time: time
-  };
-
-  const groups = JSON.parse(localStorage.getItem('groups')) || {};
-
-  if (groups[selectedContact]) {
-    const group = groups[selectedContact];
-
-    group.members.forEach(member => {
-      allChats[member] = allChats[member] || {};
-      allChats[member][selectedContact] = allChats[member][selectedContact] || [];
-
-      allChats[member][selectedContact].push({
-        ...messageObj,
-        type: member === sender ? 'sent' : 'received',
-        senderName: currentUser.firstName
-      });
-    });
-
-    sessionStorage.setItem('allChats', JSON.stringify(allChats));
-    messageInput.value = '';
-    renderMessages();
-    return; // 🔥 this line prevents private message logic from also running
-  } else {
-    const receiver = selectedContact;
-
-    allChats[sender] = allChats[sender] || {};
-    allChats[sender][receiver] = allChats[sender][receiver] || [];
-
-    allChats[receiver] = allChats[receiver] || {};
-    allChats[receiver][sender] = allChats[receiver][sender] || [];
-
-    allChats[sender][receiver].push({
-      ...messageObj,
-      type: 'sent'
-    });
-
-    allChats[receiver][sender].push({
-      ...messageObj,
-      type: 'received'
-    });
-
-    sessionStorage.setItem('allChats', JSON.stringify(allChats));
-    messageInput.value = '';
-    renderMessages();
-  }
-});
-
-// Rendering Functions
-function renderSidebar() {
-  sidebar.innerHTML = '';
-  const filter = filterDropdown?.value || 'all';
-
-  const filteredContacts = contacts.filter(contact =>
-    filter === 'online' ? contact.online : true
-  );
-
-  filteredContacts.forEach(contact => {
-    const item = document.createElement('div');
-    item.classList.add('message-item');
-    item.innerHTML = `
-      <img src="assets/avatar.jpg" alt="">
-      <div class="message-content">
-        <div class="message-header">
-          <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
-          <span>12:15</span>
-        </div>
-        <p>Tap to open chat</p>
-      </div>
-    `;
-    item.addEventListener('click', () => {
-      selectedContact = contact.email;
-      renderChatHeader(contact.name);
-      renderMessages();
-    });
-    sidebar.appendChild(item);
-  });
-
-  // Group chat logic
-  const groups = JSON.parse(localStorage.getItem('groups')) || {};
-
-  Object.entries(groups).forEach(([groupId, group]) => {
-    if (group.members.includes(currentUser.email)) {
-      const item = document.createElement('div');
-      item.classList.add('message-item');
-      item.innerHTML = `
-        <img src="assets/group-icon.png" alt="">
-        <div class="message-content">
-          <div class="message-header">
-            <h4>${group.name}</h4>
-          </div>
-          <p>Tap to open group</p>
-        </div>
-      `;
-      item.addEventListener('click', () => {
-        selectedContact = groupId;
-        renderChatHeader(group.name);
-        renderMessages();
-      });
-      sidebar.appendChild(item);
-    }
-  });
+function getTimes() {
+  const now = new Date();
+  return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function renderChatHeader(name) {
@@ -164,8 +27,12 @@ function renderChatHeader(name) {
 }
 
 function renderMessages() {
-  const chatKey = currentUser.email;
-  const userChats = allChats[chatKey] || {};
+  if (!selectedContact) {
+    chatMessages.innerHTML = '<p style="text-align:center; color:#888;">Select a chat to start messaging</p>';
+    return;
+  }
+
+  const userChats = allChats[currentUser.email] || {};
   const messages = userChats[selectedContact] || [];
   const groups = JSON.parse(localStorage.getItem('groups')) || {};
   const isGroup = !!groups[selectedContact];
@@ -187,88 +54,255 @@ function renderMessages() {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function getTimes() {
-  const now = new Date();
-  return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+function renderSidebar() {
+  sidebar.innerHTML = '';
+  const filter = filterDropdown?.value || 'all';
+
+  // Filter contacts by online status if needed
+  const filteredContacts = contacts.filter(contact => {
+    return filter === 'online' ? contact.online : true;
+  });
+
+  filteredContacts.forEach(contact => {
+    const item = document.createElement('div');
+    item.classList.add('message-item');
+    item.innerHTML = `
+      <img src="assets/avatar.jpg" alt="Avatar" />
+      <div class="message-content">
+        <div class="message-header">
+          <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
+          <span>12:15</span>
+        </div>
+        <p>Tap to open chat</p>
+      </div>
+    `;
+    item.addEventListener('click', () => {
+      selectedContact = contact.email;
+      renderChatHeader(contact.name);
+      renderMessages();
+    });
+    sidebar.appendChild(item);
+  });
+
+  // Render groups user is a member of
+  const groups = JSON.parse(localStorage.getItem('groups')) || {};
+  Object.entries(groups).forEach(([groupId, group]) => {
+    if (group.members.includes(currentUser.email)) {
+      const item = document.createElement('div');
+      item.classList.add('message-item');
+      item.innerHTML = `
+        <img src="assets/group-icon.png" alt="Group Icon" />
+        <div class="message-content">
+          <div class="message-header">
+            <h4>${group.name}</h4>
+          </div>
+          <p>Tap to open group</p>
+        </div>
+      `;
+      item.addEventListener('click', () => {
+        selectedContact = groupId;
+        renderChatHeader(group.name);
+        renderMessages();
+      });
+      sidebar.appendChild(item);
+    }
+  });
 }
 
 window.onload = () => {
+  if (!currentUser) {
+    window.location.href = "/index.html";
+    return;
+  }
+
+  // Load users from localStorage and filter out current user for contacts
+  let usersData = localStorage.getItem("users");
+  try {
+    users = JSON.parse(usersData);
+    if (!Array.isArray(users)) users = [];
+  } catch {
+    users = [];
+  }
+
+  contacts = users
+    .filter(user => user.email !== currentUser.email)
+    .map(user => ({
+      name: user.firstName,
+      email: user.email,
+      online: sessionStorage.getItem(user.email) ? true : false
+    }));
+
+  document.querySelector('.current-user-email').innerText = currentUser.email;
+  sessionStorage.setItem(currentUser.email, 'online');
+
+  // Setup event listeners
+  if (filterDropdown) {
+    filterDropdown.addEventListener('change', () => {
+      renderSidebar();
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem("currentUser");
+      sessionStorage.removeItem(currentUser.email);
+      window.location.href = "/index.html";
+    });
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const text = messageInput.value.trim();
+    if (!text || !selectedContact) return;
+
+    const sender = currentUser.email;
+    const time = getTimes();
+    const messageObj = {
+      text: text,
+      time: time
+    };
+
+    const groups = JSON.parse(localStorage.getItem('groups')) || {};
+
+    if (groups[selectedContact]) {
+      const group = groups[selectedContact];
+
+      group.members.forEach(member => {
+        allChats[member] = allChats[member] || {};
+        allChats[member][selectedContact] = allChats[member][selectedContact] || [];
+
+        allChats[member][selectedContact].push({
+          ...messageObj,
+          type: member === sender ? 'sent' : 'received',
+          senderName: currentUser.firstName
+        });
+      });
+
+      localStorage.setItem('allChats', JSON.stringify(allChats));
+      messageInput.value = '';
+      renderMessages();
+      return;
+    } else {
+      const receiver = selectedContact;
+
+      allChats[sender] = allChats[sender] || {};
+      allChats[sender][receiver] = allChats[sender][receiver] || [];
+
+      allChats[receiver] = allChats[receiver] || {};
+      allChats[receiver][sender] = allChats[receiver][sender] || [];
+
+      allChats[sender][receiver].push({
+        ...messageObj,
+        type: 'sent'
+      });
+
+      allChats[receiver][sender].push({
+        ...messageObj,
+        type: 'received'
+      });
+
+      localStorage.setItem('allChats', JSON.stringify(allChats));
+      messageInput.value = '';
+      renderMessages();
+    }
+  });
+
+  // Sync messages between tabs using storage event
+  window.addEventListener("storage", (event) => {
+    if (event.key === "allChats") {
+      allChats = JSON.parse(event.newValue);
+      renderMessages();
+    }
+  });
+
+  // Group modal elements & buttons
+  const createGroupBtn = document.getElementById('create-group-btn');
+  const groupModal = document.getElementById('group-modal');
+  const groupNameInput = document.getElementById('group-name');
+  const groupMembersDiv = document.getElementById('group-members');
+  const confirmGroupBtn = document.getElementById('confirm-group');
+  const cancelGroupBtn = document.getElementById('cancel-group');
+
+  createGroupBtn.addEventListener('click', () => {
+    groupNameInput.value = '';
+    groupMembersDiv.innerHTML = '';
+
+    contacts.forEach(contact => {
+      const checkbox = document.createElement('div');
+      checkbox.innerHTML = `
+        <label>
+          <input type="checkbox" value="${contact.email}"> ${contact.name}
+        </label>
+      `;
+      groupMembersDiv.appendChild(checkbox);
+    });
+
+    groupModal.style.display = 'flex';
+  });
+
+  cancelGroupBtn.addEventListener('click', () => {
+    groupModal.style.display = 'none';
+  });
+
+  confirmGroupBtn.addEventListener('click', () => {
+    const groupName = groupNameInput.value.trim();
+    const checkedBoxes = groupMembersDiv.querySelectorAll('input[type="checkbox"]:checked');
+
+    if (!groupName) {
+      alert("Please enter a group name.");
+      return;
+    }
+
+    const selectedEmails = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (selectedEmails.length === 0) {
+      alert("Select at least one member.");
+      return;
+    }
+
+    // Always add current user
+    if (!selectedEmails.includes(currentUser.email)) {
+      selectedEmails.push(currentUser.email);
+    }
+
+    const groupId = `group_${Date.now()}`;
+
+    const groupMembers = Array.from(new Set(selectedEmails));
+
+    groupMembers.forEach(member => {
+      allChats[member] = allChats[member] || {};
+      allChats[member][groupId] = allChats[member][groupId] || [];
+    });
+
+    localStorage.setItem('allChats', JSON.stringify(allChats));
+
+    let groups = JSON.parse(localStorage.getItem('groups')) || {};
+    groups[groupId] = {
+      name: groupName,
+      members: groupMembers
+    };
+    localStorage.setItem('groups', JSON.stringify(groups));
+
+    groupModal.style.display = 'none';
+    groupNameInput.value = '';
+    renderSidebar();
+  });
+
+  // Initial render
   renderSidebar();
 
+  // Select first contact or group if available
   if (contacts.length > 0) {
     selectedContact = contacts[0].email;
     renderChatHeader(contacts[0].name);
+    renderMessages();
+  } else {
+    // If no contacts, check groups
+    const groups = JSON.parse(localStorage.getItem('groups')) || {};
+    const userGroups = Object.entries(groups).filter(([id, g]) => g.members.includes(currentUser.email));
+    if (userGroups.length > 0) {
+      selectedContact = userGroups[0][0];
+      renderChatHeader(userGroups[0][1].name);
+      renderMessages();
+    }
   }
-
-  renderMessages();
 };
-
-// Group Creation
-const createGroupBtn = document.getElementById('create-group-btn');
-const groupModal = document.getElementById('group-modal');
-const groupNameInput = document.getElementById('group-name');
-const groupMembersDiv = document.getElementById('group-members');
-const confirmGroupBtn = document.getElementById('confirm-group');
-const cancelGroupBtn = document.getElementById('cancel-group');
-
-createGroupBtn.addEventListener('click', () => {
-  groupNameInput.value = '';
-  groupMembersDiv.innerHTML = '';
-
-  contacts.forEach(contact => {
-    const checkbox = document.createElement('div');
-    checkbox.innerHTML = `
-      <label>
-        <input type="checkbox" value="${contact.email}"> ${contact.name}
-      </label>
-    `;
-    groupMembersDiv.appendChild(checkbox);
-  });
-
-  groupModal.style.display = 'flex';
-});
-
-cancelGroupBtn.addEventListener('click', () => {
-  groupModal.style.display = 'none';
-});
-
-confirmGroupBtn.addEventListener('click', () => {
-  const groupName = groupNameInput.value.trim();
-  const checkedBoxes = groupMembersDiv.querySelectorAll('input[type="checkbox"]:checked');
-
-  if (!groupName) {
-    alert("Please enter a group name.");
-    return;
-  }
-
-  const selectedEmails = Array.from(checkedBoxes).map(cb => cb.value);
-
-  if (selectedEmails.length === 0) {
-    alert("Select at least one member.");
-    return;
-  }
-
-  selectedEmails.push(currentUser.email);
-  const groupId = `group_${Date.now()}`;
-
- const groupMembers = Array.from(new Set([...selectedEmails, currentUser.email]));
-
-
-  groupMembers.forEach(member => {
-    allChats[member] = allChats[member] || {};
-    allChats[member][groupId] = allChats[member][groupId] || [];
-  });
-
-  sessionStorage.setItem('allChats', JSON.stringify(allChats));
-
-  let groups = JSON.parse(localStorage.getItem('groups')) || {};
-  groups[groupId] = {
-    name: groupName,
-    members: groupMembers
-  };
-  localStorage.setItem('groups', JSON.stringify(groups));
-
-  groupModal.style.display = 'none';
-  groupNameInput.value = '';
-  renderSidebar();
-});
