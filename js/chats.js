@@ -84,7 +84,7 @@ function renderSidebar() {
     const item = document.createElement('div');
     item.classList.add('message-item');
     item.innerHTML = `
-      <img src="/assets/profile1.jpg" alt="Avatar" class="profile-img" />
+      <img src="../assets/profile1.jpg" alt="Avatar" class="profile-img" />
       <div class="message-content">
         <div class="message-header">
           <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
