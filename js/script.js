@@ -38,16 +38,17 @@ document.getElementById('registration-form').addEventListener('submit', function
     const username = email;
     const users = JSON.parse(localStorage.getItem('users')) || [];
 
-    if(users[username]){
-        alert('User already exists.');
-        return;
-    }
-    users[username] = {
-        email,
-        firstName,
-        lastName,
-        password
-    };
+  const userExists = users.some(user => user.email === email);
+if (userExists) {
+    alert('User already exists.');
+    return;
+}
+   users.push({
+    email,
+    firstName,
+    lastName,
+    password
+});
 
     localStorage.setItem('users', JSON.stringify(users));
     alert('Registration successful! You can now log in.');
@@ -61,20 +62,21 @@ document.getElementById('login-form').addEventListener('submit', function(e) {
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
 
-    const users = JSON.parse(localStorage.getItem('users')) || {};
+    const users = JSON.parse(localStorage.getItem('users')) || [];
 
-    
-    if (!users[username]) {
-        alert('User does not exist.');
-        return;
-    }
+    const user = users.find(user => user.email === username);
+if (!user) {
+    alert('User does not exist.');
+    return;
+}
 
-    if (users[username].password !== password) {
-        alert('Incorrect password.');
-        return;
-    }
+    if (user.password !== password) {
+    alert('Incorrect password.');
+    return;
+}
 
-    localStorage.setItem('currentUser', JSON.stringify(users[username]));
+
+    localStorage.setItem('currentUser', JSON.stringify(user));
     alert('Login successful!');
     window.location.href = '/pages/chats.html';
 });
