@@ -9,10 +9,12 @@ const filterDropdown = document.getElementById('user-filter');
 
 
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
 let selectedContact = null;
 let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
 let messages = JSON.parse(localStorage.getItem('messages')) || [];
 
+/*code for loading all users that are registered */
 let usersData = localStorage.getItem("users");
 let users = [];
 
@@ -25,16 +27,16 @@ try {
   users = [];
 }
 
-
-const contacts = users.filter(user => user.email !== currentUser.email).map(user => ({name: user.firstName, email: user.email, online: true}));
-
+//this removes the currently signed in user from the chat list
+const contacts = users.filter(user => user.email !== currentUser.email)
+.map(user => ({name: user.firstName, email: user.email, online: true}));
 
 if (!currentUser) {
   window.location.href = "/index.html";
 }
 document.querySelector('.current-user-email').innerText = currentUser.email;
 
-//Event listeners
+//filters users by status (online/offline)
 if (filterDropdown) {
   filterDropdown.addEventListener('change', renderSidebar);
 }
@@ -52,7 +54,7 @@ submitBtn.addEventListener('click', () => {
   const text = messageInput.value.trim();
   if (!text || !selectedContact) return;
 
-  //save messages for both users
+  //save messages for both users in allChats
   const sender = currentUser.email;
   const receiver = selectedContact;
 
