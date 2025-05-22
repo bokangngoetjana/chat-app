@@ -6,6 +6,9 @@ const usernameDisplay = document.querySelector('.profile-details h4');
 const sidebar = document.getElementById('sidebar');
 const filterDropdown = document.getElementById('user-filter');
 
+const typingIndicator = document.getElementById("typing-indicator");
+let typingTimeout;
+
 const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
 
 let selectedContact = null;
@@ -67,7 +70,7 @@ function renderSidebar() {
     const item = document.createElement('div');
     item.classList.add('message-item');
     item.innerHTML = `
-      <img src="assets/avatar.jpg" alt="Avatar" />
+      <img src="/assets/profile1.jpg" alt="Avatar" class="profile-img" />
       <div class="message-content">
         <div class="message-header">
           <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
@@ -214,6 +217,41 @@ window.onload = () => {
     }
   });
 
+window.addEventListener("storage", (event) => {
+  if (event.key === "typingStatus") {
+    const typingData = JSON.parse(event.newValue);
+    if (
+      typingData &&
+      typingData.to === currentUser.email &&
+      typingData.from !== currentUser.email
+    ) {
+      showTypingIndicator(`${typingData.name} is typing...`);
+
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        typingIndicator.innerText = '';
+      }, 3000);
+    }
+  }
+});
+
+messageInput.addEventListener("input", () => {
+  if(!selectedContact) return;
+
+  const typingStatus = {
+    from: currentUser.email,
+    to: selectedContact,
+    name: currentUser.firstName,
+    time: Date.now()
+  };
+ localStorage.setItem("typingStatus", JSON.stringify(typingStatus));
+
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    localStorage.removeItem("typingStatus");
+  }, 6000);
+});
+
   // Group modal elements & buttons
   const createGroupBtn = document.getElementById('create-group-btn');
   const groupModal = document.getElementById('group-modal');
@@ -305,4 +343,8 @@ window.onload = () => {
       renderMessages();
     }
   }
+  function showTypingIndicator(message) {
+  typingIndicator.innerText = message;
+}
+
 };
