@@ -127,6 +127,14 @@ body {
     font-size: 0.9rem;
     color: #666;
 }
+.toggle-sidebar-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  margin-left: auto;
+  cursor: pointer;
+}
 
 /* Chat Area */
 .selected-chat {
@@ -337,21 +345,34 @@ body {
 
 @media (max-width: 768px) {
     .container {
+        position: relative;
         flex-direction: column;
-        height: auto;
     }
 
     .message-list {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #ccc;
+        position: absolute;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    z-index: 1000;
+    background-color: white;
+    border-right: 1px solid #ccc;
+    transform: translateX(-100%);
     }
 
-    .selected-chat {
-        width: 100%;
-        height: auto;
-    }
+  .message-list.show {
+    transform: translateX(0%);
+  }
+
+  .toggle-sidebar-btn {
+    display: block;
+  }
+
+  .selected-chat {
+    flex: 1;
+    z-index: 1;
+  }
 
     .chat-messages {
         height: 60vh;
