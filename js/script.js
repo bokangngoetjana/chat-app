@@ -83,7 +83,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
         return;
     }
 
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    sessionStorage.setItem('currentUser', JSON.stringify(user));
     alert('Login successful!');
     window.location.href = '/pages/chats.html';
 });

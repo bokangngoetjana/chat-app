@@ -14,6 +14,7 @@
                         <option value="online">Online Only</option>
                     </select>
                         <a href="/pages/profile.html"><label id="profileIcon" class="user-profile">Profile</label></a>
+                        <button id="create-group-btn">Create Group</button>
                 </div>
                 <div class="sidebar" id="sidebar">
                     
@@ -39,6 +40,21 @@
                 </div>
             </div>
         </div>
+        <!-- Group Chat Modal -->
+<div id="group-modal" style="display:none;" class="modal-overlay">
+  <div class="modal-content">
+    <h3>Create Group Chat</h3>
+    <input type="text" id="group-name" placeholder="Group Name" />
+    <div id="group-members">
+      <!-- Checkboxes for users will be added here -->
+    </div>
+    <div class="modal-buttons">
+      <button id="confirm-group">Create Group</button>
+      <button id="cancel-group">Cancel</button>
+    </div>
+  </div>
+</div>
+
         <script src="/js/chats.js"></script>
     </body>
     <footer>
