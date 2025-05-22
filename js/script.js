@@ -85,6 +85,6 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
     sessionStorage.setItem('currentUser', JSON.stringify(user));
     alert('Login successful!');
-    window.location.href = '/pages/chats.html';
+    window.location.href = 'chat-app/pages/chats.html';
 
 });
