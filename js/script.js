@@ -67,7 +67,7 @@ document.getElementById('login-form').addEventListener('submit', async function(
 
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+    let users = JSON.parse(localStorage.getItem('users')) || [];
 
     const user = users.find(user => user.email === username);
 
