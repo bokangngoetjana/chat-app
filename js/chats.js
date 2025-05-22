@@ -5,17 +5,26 @@ const logoutBtn = document.getElementById('logoutBtn');
 const usernameDisplay = document.querySelector('.profile-details h4');
 const sidebar = document.getElementById('sidebar');
 const filterDropdown = document.getElementById('user-filter');
+const typingIndicator = document.getElementById("typing-indicator");
+const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+const messageList = document.querySelector('.message-list');
 
-const currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
-
-let selectedContact = null;
-
-// ✅ Now using ONLY localStorage for allChats
+let typingTimeout;
+let currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
 let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
-
-// Users array & contacts list will be set inside onload to ensure proper scope
 let users = [];
 let contacts = [];
+let selectedContact = null;
+
+toggleSidebarBtn.addEventListener('click', () => {
+  messageList.classList.toggle('show');
+});
+
+function autoCloseSidebarOnSmallScreen() {
+  if (window.innerWidth <= 768) {
+    messageList.classList.remove('show');
+  }
+}
 
 function getTimes() {
   const now = new Date();
@@ -47,7 +56,6 @@ function renderMessages() {
       <p>${isGroup && msg.senderName ? `<strong>${msg.senderName}:</strong> ` : ''}${msg.text}</p>
       <span class="timestamp">${msg.time}</span>
     `;
-
     chatMessages.appendChild(msgDiv);
   });
 
@@ -58,7 +66,6 @@ function renderSidebar() {
   sidebar.innerHTML = '';
   const filter = filterDropdown?.value || 'all';
 
-  // Filter contacts by online status if needed
   const filteredContacts = contacts.filter(contact => {
     return filter === 'online' ? contact.online : true;
   });
@@ -67,7 +74,7 @@ function renderSidebar() {
     const item = document.createElement('div');
     item.classList.add('message-item');
     item.innerHTML = `
-      <img src="assets/avatar.jpg" alt="Avatar" />
+      <img src="/assets/profile1.jpg" alt="Avatar" class="profile-img" />
       <div class="message-content">
         <div class="message-header">
           <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
@@ -80,11 +87,11 @@ function renderSidebar() {
       selectedContact = contact.email;
       renderChatHeader(contact.name);
       renderMessages();
+      autoCloseSidebarOnSmallScreen();
     });
     sidebar.appendChild(item);
   });
 
-  // Render groups user is a member of
   const groups = JSON.parse(localStorage.getItem('groups')) || {};
   Object.entries(groups).forEach(([groupId, group]) => {
     if (group.members.includes(currentUser.email)) {
@@ -103,6 +110,7 @@ function renderSidebar() {
         selectedContact = groupId;
         renderChatHeader(group.name);
         renderMessages();
+        autoCloseSidebarOnSmallScreen();
       });
       sidebar.appendChild(item);
     }
@@ -115,7 +123,6 @@ window.onload = () => {
     return;
   }
 
-  // Load users from localStorage and filter out current user for contacts
   let usersData = localStorage.getItem("users");
   try {
     users = JSON.parse(usersData);
@@ -135,7 +142,6 @@ window.onload = () => {
   document.querySelector('.current-user-email').innerText = currentUser.email;
   sessionStorage.setItem(currentUser.email, 'online');
 
-  // Setup event listeners
   if (filterDropdown) {
     filterDropdown.addEventListener('change', () => {
       renderSidebar();
@@ -156,16 +162,11 @@ window.onload = () => {
 
     const sender = currentUser.email;
     const time = getTimes();
-    const messageObj = {
-      text: text,
-      time: time
-    };
-
+    const messageObj = { text, time };
     const groups = JSON.parse(localStorage.getItem('groups')) || {};
 
     if (groups[selectedContact]) {
       const group = groups[selectedContact];
-
       group.members.forEach(member => {
         allChats[member] = allChats[member] || {};
         allChats[member][selectedContact] = allChats[member][selectedContact] || [];
@@ -176,45 +177,82 @@ window.onload = () => {
           senderName: currentUser.firstName
         });
       });
-
-      localStorage.setItem('allChats', JSON.stringify(allChats));
-      messageInput.value = '';
-      renderMessages();
-      return;
     } else {
       const receiver = selectedContact;
-
       allChats[sender] = allChats[sender] || {};
       allChats[sender][receiver] = allChats[sender][receiver] || [];
 
       allChats[receiver] = allChats[receiver] || {};
       allChats[receiver][sender] = allChats[receiver][sender] || [];
 
-      allChats[sender][receiver].push({
-        ...messageObj,
-        type: 'sent'
-      });
-
-      allChats[receiver][sender].push({
-        ...messageObj,
-        type: 'received'
-      });
-
-      localStorage.setItem('allChats', JSON.stringify(allChats));
-      messageInput.value = '';
-      renderMessages();
+      allChats[sender][receiver].push({ ...messageObj, type: 'sent' });
+      allChats[receiver][sender].push({ ...messageObj, type: 'received' });
     }
+
+    localStorage.setItem('allChats', JSON.stringify(allChats));
+    messageInput.value = '';
+    renderMessages();
   });
 
-  // Sync messages between tabs using storage event
+  messageInput.addEventListener("input", () => {
+    if (!selectedContact) return;
+
+    const typingStatus = {
+      from: currentUser.email,
+      to: selectedContact,
+      name: currentUser.firstName,
+      time: Date.now()
+    };
+
+    localStorage.setItem("typingStatus", JSON.stringify(typingStatus));
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      localStorage.removeItem("typingStatus");
+    }, 6000);
+  });
+
   window.addEventListener("storage", (event) => {
     if (event.key === "allChats") {
       allChats = JSON.parse(event.newValue);
       renderMessages();
     }
+
+    if (event.key === "typingStatus") {
+      const typingData = JSON.parse(event.newValue);
+      if (
+        typingData &&
+        typingData.to === currentUser.email &&
+        typingData.from !== currentUser.email
+      ) {
+        showTypingIndicator(`${typingData.name} is typing...`);
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          typingIndicator.innerText = '';
+        }, 3000);
+      }
+    }
   });
 
-  // Group modal elements & buttons
+  // Render sidebar
+  renderSidebar();
+
+  // Auto-select the first contact or group
+  if (contacts.length > 0) {
+    selectedContact = contacts[0].email;
+    renderChatHeader(contacts[0].name);
+  } else {
+    const groups = JSON.parse(localStorage.getItem('groups')) || {};
+    const userGroups = Object.entries(groups).filter(([_, g]) => g.members.includes(currentUser.email));
+    if (userGroups.length > 0) {
+      selectedContact = userGroups[0][0];
+      renderChatHeader(userGroups[0][1].name);
+    }
+  }
+
+  renderMessages();
+
+  // Group chat modal logic...
   const createGroupBtn = document.getElementById('create-group-btn');
   const groupModal = document.getElementById('group-modal');
   const groupNameInput = document.getElementById('group-name');
@@ -229,9 +267,7 @@ window.onload = () => {
     contacts.forEach(contact => {
       const checkbox = document.createElement('div');
       checkbox.innerHTML = `
-        <label>
-          <input type="checkbox" value="${contact.email}"> ${contact.name}
-        </label>
+        <label><input type="checkbox" value="${contact.email}"> ${contact.name}</label>
       `;
       groupMembersDiv.appendChild(checkbox);
     });
@@ -247,26 +283,16 @@ window.onload = () => {
     const groupName = groupNameInput.value.trim();
     const checkedBoxes = groupMembersDiv.querySelectorAll('input[type="checkbox"]:checked');
 
-    if (!groupName) {
-      alert("Please enter a group name.");
-      return;
-    }
+    if (!groupName) return alert("Please enter a group name.");
+    if (checkedBoxes.length === 0) return alert("Select at least one member.");
 
     const selectedEmails = Array.from(checkedBoxes).map(cb => cb.value);
-
-    if (selectedEmails.length === 0) {
-      alert("Select at least one member.");
-      return;
-    }
-
-    // Always add current user
     if (!selectedEmails.includes(currentUser.email)) {
       selectedEmails.push(currentUser.email);
     }
 
     const groupId = `group_${Date.now()}`;
-
-    const groupMembers = Array.from(new Set(selectedEmails));
+    const groupMembers = [...new Set(selectedEmails)];
 
     groupMembers.forEach(member => {
       allChats[member] = allChats[member] || {};
@@ -276,33 +302,15 @@ window.onload = () => {
     localStorage.setItem('allChats', JSON.stringify(allChats));
 
     let groups = JSON.parse(localStorage.getItem('groups')) || {};
-    groups[groupId] = {
-      name: groupName,
-      members: groupMembers
-    };
+    groups[groupId] = { name: groupName, members: groupMembers };
     localStorage.setItem('groups', JSON.stringify(groups));
 
     groupModal.style.display = 'none';
     groupNameInput.value = '';
     renderSidebar();
   });
-
-  // Initial render
-  renderSidebar();
-
-  // Select first contact or group if available
-  if (contacts.length > 0) {
-    selectedContact = contacts[0].email;
-    renderChatHeader(contacts[0].name);
-    renderMessages();
-  } else {
-    // If no contacts, check groups
-    const groups = JSON.parse(localStorage.getItem('groups')) || {};
-    const userGroups = Object.entries(groups).filter(([id, g]) => g.members.includes(currentUser.email));
-    if (userGroups.length > 0) {
-      selectedContact = userGroups[0][0];
-      renderChatHeader(userGroups[0][1].name);
-      renderMessages();
-    }
-  }
 };
+
+function showTypingIndicator(message) {
+  typingIndicator.innerText = message;
+}
