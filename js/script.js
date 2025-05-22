@@ -36,7 +36,7 @@ document.getElementById('registration-form').addEventListener('submit', function
         return;
     }
     const username = email;
-    const users = JSON.parse(localStorage.getItem('users')) || {};
+    const users = JSON.parse(localStorage.getItem('users')) || [];
 
     if(users[username]){
         alert('User already exists.');

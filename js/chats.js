@@ -9,31 +9,49 @@ const sidebar = document.getElementById('sidebar');
 let messages = JSON.parse(localStorage.getItem('messages')) || [];
 
 
-const contacts = ['Leigh', 'Kayleen', 'Murray'];
+const contacts = [
+  {name: 'Leigh', online: true},
+  {name: 'Lerato', online: false},
+  {name: 'Kayleen', online: false},
+  {name: 'Murray', online: true},
+  {name: 'Lesedi', online: false}
+]
 
 function renderSidebar(){
     sidebar.innerHTML = '';
-    contacts.forEach(name => {
+
+    const filter = document.getElementById('user-filter')?.value || 'all';
+    const filteredContacts = contacts.filter(contact => {
+    return filter === 'online' ? contact.online : true;
+  });
+
+
+    filteredContacts.forEach(contacts => {
         const item = document.createElement('div');
         item.classList.add('message-item');
         item.innerHTML =  `
          <img src="images/avatar.jpg" alt="">
       <div class="message-content">
         <div class="message-header">
-          <h4>${name}</h4>
+          <h4>${contacts.name} ${contacts.online ? '<span style="color:green;">●</span>' : ''}</h4>
           <span>12:15</span>
         </div>
         <p>Tap to open chat</p>
       </div>
         `;
         item.addEventListener('click', () => {
-            selectedContact = name;
-            renderChatHeader(name);
+            selectedContact = contacts.name;
+            renderChatHeader(contacts.name);
             renderMessages();
         });
         sidebar.appendChild(item);
     })
 }
+const filterDropdown = document.getElementById('user-filter');
+if (filterDropdown) {
+  filterDropdown.addEventListener('change', renderSidebar);
+}
+
 function renderChatHeader(name) {
   usernameDisplay.innerText = name;
 }

@@ -26,17 +26,17 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 30%;
-    background: #fefbff;
-    border-right: 1px solid #ccc;
-    display: flex;
-    flex-direction: column;
+   flex: 1;
+   overflow-y: auto;
 }
 
 .sidebar-header {
     background: #5a2a7f;
     color: white;
     padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .sidebar-header h2 {
@@ -61,6 +61,12 @@ body {
 
 .message-item:hover {
     background-color: #e6e6e6;
+}
+.message-header span {
+  font-size: 12px;
+  color: green;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 .message-info h4 {
@@ -201,4 +207,13 @@ body {
     position: relative;
     font-size: 0.95rem;
     word-wrap: break-word;
+}
+.message-list {
+    width: 30%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #fefbff;
+    border-right: 1px solid #ccc;
+    overflow: hidden;
 }
