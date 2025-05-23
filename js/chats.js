@@ -1,4 +1,3 @@
-// ==================== DOM Elements ====================
 const submitBtn = document.getElementById('submit-btn');
 const messageInput = document.getElementById('message-input');
 const chatMessages = document.getElementById('chat-messages');
@@ -46,7 +45,7 @@ function renderChatHeader(name) {
   usernameDisplay.innerText = name;
 }
 
-function renderMessages() {
+const renderMessages = () => {
   if (!selectedContact) {
     chatMessages.innerHTML = '<p style="text-align:center; color:#888;">Select a chat to start messaging</p>';
     return;
@@ -68,7 +67,6 @@ function renderMessages() {
     `;
     chatMessages.appendChild(msgDiv);
   });
-
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
@@ -127,7 +125,8 @@ function renderSidebar() {
   });
 }
 
-// ==================== Event Handlers ====================
+
+
 toggleSidebarBtn.addEventListener('click', () => {
   messageList.classList.toggle('show');
 });
@@ -207,7 +206,7 @@ window.addEventListener("storage", (event) => {
   }
 });
 
-// ==================== Group Chat Modal ====================
+//Group Chat Modal 
 createGroupBtn.addEventListener('click', () => {
   groupNameInput.value = '';
   groupMembersDiv.innerHTML = '';
