@@ -282,6 +282,12 @@ window.onload = () => {
     users = [];
   }
 
+  //populate users for group selection
+  contacts = users.filter(user => user.email !== currentUser.email).map(user => ({
+    email: user.email,
+    name: user.firstName
+  }));
+
   if (filterDropdown) {
     filterDropdown.value = 'all';
     filterDropdown.addEventListener('change', renderSidebar);
@@ -292,7 +298,6 @@ window.onload = () => {
     const onlineUsers = JSON.parse(localStorage.getItem("onlineUsers")) || {};
     return new Set(Object.keys(onlineUsers));
   }
-
   
   const onlineUsers = JSON.parse(localStorage.getItem("onlineUsers")) || {};
   onlineUsers[currentUser.email] = {
