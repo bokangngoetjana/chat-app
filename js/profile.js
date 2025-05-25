@@ -1,8 +1,21 @@
 const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
 const users = JSON.parse(localStorage.getItem("users")) || {};
 
+const showToast = (message, type='success') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 4000);
+    };
+
+
 if(!currentUser){
-    alert("No user logged in.")
+    showToast("No user logged in.", 'error')
     window.location.href = "/index.html";
 }
 
@@ -14,11 +27,11 @@ document.getElementById("updateBtn").addEventListener("click", () => {
     const newEmail = document.getElementById("emailInput").value.trim();
 
     if(!newEmail || newEmail === currentUser.email){
-        alert("No change detected");
+        showToast("No change detected", 'error');
         return;
     }
     if(users[newEmail]){
-        alert("This email is already in use.");
+        showToast("This email is already in use.",'error');
         return;
     }
 
@@ -29,7 +42,7 @@ document.getElementById("updateBtn").addEventListener("click", () => {
   localStorage.setItem("users", JSON.stringify(users));
   sessionStorage.setItem("currentUser", JSON.stringify(users[newEmail]));
 
-  alert("Username updated successfully!");
+  showToast("Username updated successfully!",'success');
   window.location.reload();
 });
 document.getElementById("back").addEventListener("click", () => {
