@@ -17,7 +17,7 @@
   margin-top: 10px;
   border-radius: 5px;
   opacity: 0;
-  animation: fadeInOut 4s forwards;
+  animation: fadeInOut 6s forwards;
   font-size: 14px;
 }
 .toast.success{

@@ -12,7 +12,7 @@ const showToast = (message, type='success') => {
 
         setTimeout(() => {
             toast.remove();
-        }, 4000);
+        }, 6000);
     };
 
 loginBtn.addEventListener('click', () => {
