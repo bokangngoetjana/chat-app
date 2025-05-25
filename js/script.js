@@ -3,6 +3,18 @@ const registerBtn = document.getElementById('show-register');
 const loginForm = document.getElementById('login-toggle');
 const registerForm = document.getElementById('register-toggle');
 
+const showToast = (message, type='success') => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 6000);
+    };
+
 loginBtn.addEventListener('click', () => {
     loginForm.classList.add('active');
     registerForm.classList.remove('active');
@@ -36,7 +48,7 @@ document.getElementById('registration-form').addEventListener('submit', async fu
     const confirmPwd = document.getElementById('confirm-pwd').value;
 
     if (password !== confirmPwd) {
-        alert('Passwords do not match!');
+        showToast('Passwords do not match!', 'error');
         return;
     }
 
@@ -44,7 +56,7 @@ document.getElementById('registration-form').addEventListener('submit', async fu
     const userExists = users.some(user => user.email === email);
 
     if (userExists) {
-        alert('User already exists.');
+        showToast('User already exists.','error');
         return;
     }
 
@@ -58,7 +70,7 @@ document.getElementById('registration-form').addEventListener('submit', async fu
     });
 
     localStorage.setItem('users', JSON.stringify(users));
-    alert('Registration successful! You can now log in.');
+    showToast('Registration successful! You can now log in.', 'success');
     loginBtn.click();
 });
 
@@ -72,19 +84,19 @@ document.getElementById('login-form').addEventListener('submit', async function(
     const user = users.find(user => user.email === username);
 
     if (!user) {
-        alert('User does not exist.');
+        showToast('User does not exist.', 'error');
         return;
     }
 
     const hashedPassword = await hashPassword(password);
 
     if (user.password !== hashedPassword) {
-        alert('Incorrect password.');
+        showToast('Incorrect password.','error');
         return;
     }
 
     sessionStorage.setItem('currentUser', JSON.stringify(user));
-    alert('Login successful!');
+    showToast('Login successful!','success');
     window.location.href = 'pages/chats.html';
 
 });
