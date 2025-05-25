@@ -1,5 +1,5 @@
 const currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
-const users = JSON.parse(localStorage.getItem("users")) || {};
+let users = JSON.parse(localStorage.getItem("users")) || [];
 
 const showToast = (message, type='success') => {
         const container = document.getElementById('toast-container');
@@ -34,13 +34,53 @@ document.getElementById("updateBtn").addEventListener("click", () => {
         showToast("This email is already in use.",'error');
         return;
     }
+    const oldEmail = currentUser.email;
+    const updatedUser = {...currentUser, email: newEmail};
 
-    // Update user data
-  users[newEmail] = { ...currentUser, email: newEmail };
-  delete users[currentUser.email];
+    //update users
+    users[newEmail] = updatedUser;
+    delete users[oldEmail];
 
-  localStorage.setItem("users", JSON.stringify(users));
-  sessionStorage.setItem("currentUser", JSON.stringify(users[newEmail]));
+    users = users.map(user => user.email === oldEmail ? updatedUser : user);
+    localStorage.setItem("users", JSON.stringify(users));
+
+    //update all chats
+    let allChats = JSON.parse(localStorage.getItem("allChats")) || {};
+
+    //rename top-level key
+    if(allChats[oldEmail]) {
+        allChats[newEmail] = allChats[oldEmail];
+        delete allChats[oldEmail];
+    }
+
+    //update nested references
+    for(let user in allChats){
+        if(allChats[user][oldEmail]){
+            allChats[user][newEmail] = allChats[user][oldEmail];
+            delete allChats[user][oldEmail];
+        }
+    }
+    localStorage.setItem("allChats", JSON.stringify(allChats));
+
+    //update online users
+    let onlineUsers = JSON.parse(localStorage.getItem("onlineUsers")) || {};
+    if(onlineUsers[oldEmail]){
+        onlineUsers[newEmail] = {...onlineUsers[oldEmail], email: newEmail};
+        delete onlineUsers[oldEmail];
+    }
+    localStorage.setItem("onlineUsers", JSON.stringify(onlineUsers));
+
+    //update groups
+    let groups = JSON.parse(localStorage.getItem("groups")) || {};
+    for(let groupId in groups) {
+        const group = groups[groupId];
+        if(group.members.includes(oldEmail)){
+            group.members = group.members.map(email => email === oldEmail ? newEmail : email);
+        }
+    }
+    localStorage.setItem("groups", JSON.stringify(groups));
+
+    sessionStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
   showToast("Username updated successfully!",'success');
   window.location.reload();
