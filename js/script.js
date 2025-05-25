@@ -53,6 +53,7 @@ document.getElementById('registration-form').addEventListener('submit', async fu
     }
 
     const users = JSON.parse(localStorage.getItem('users')) || [];
+   
     const userExists = users.some(user => user.email === email);
 
     if (userExists) {
@@ -76,7 +77,7 @@ document.getElementById('registration-form').addEventListener('submit', async fu
 
 document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-
+   
     const username = document.getElementById('login-username').value;
     const password = document.getElementById('login-password').value;
     let users = JSON.parse(localStorage.getItem('users')) || [];
