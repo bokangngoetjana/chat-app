@@ -25,6 +25,7 @@ let contacts = [];
 let selectedContact = null;
 
 //first render function
+
 const getTimes = () => {
   const now = new Date();
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -73,10 +74,19 @@ const renderSidebar = () => {
   sidebar.innerHTML = '';
   const filter = filterDropdown?.value || 'all';
 
-  const filteredContacts = contacts.filter(contact => {
+  const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || {};
+  const onlineSet = new Set(Object.keys(onlineUsers));
+
+  const filteredContacts = users.filter(user => user.email !== currentUser)
+  .map(user => ({
+    name: user.firstName,
+    email: user.email,
+    online: onlineSet.has(user.email)
+  })).filter(contact => {
     return filter === 'online' ? contact.online : true;
   });
 
+  //render contacts
   filteredContacts.forEach(contact => {
     const item = document.createElement('div');
     item.classList.add('message-item');
@@ -124,7 +134,9 @@ const renderSidebar = () => {
   });
 }
 
-
+if(sidebar.innerHTML.trim() === ''){
+  sidebar.innerHTML = `<p>no contacts found</p>`
+}
 
 toggleSidebarBtn.addEventListener('click', () => {
   messageList.classList.toggle('show');
@@ -203,6 +215,9 @@ window.addEventListener("storage", (event) => {
       }, 3000);
     }
   }
+  if(event.key === "onlineUsers"){
+    renderSidebar();
+  }
 });
 
 //Group Chat Modal 
@@ -267,25 +282,39 @@ window.onload = () => {
     users = [];
   }
 
-  contacts = users
-    .filter(user => user.email !== currentUser.email)
-    .map(user => ({
-      name: user.firstName,
-      email: user.email,
-      online: sessionStorage.getItem(user.email) ? true : false
-    }));
-
-  document.querySelector('.current-user-email').innerText = currentUser.email;
-  sessionStorage.setItem(currentUser.email, 'online');
-
   if (filterDropdown) {
+    filterDropdown.value = 'all';
     filterDropdown.addEventListener('change', renderSidebar);
   }
+  sessionStorage.setItem(currentUser.email, 'online');
+
+  const getOnlineUsers = () => {
+    const onlineUsers = JSON.parse(localStorage.getItem("onlineUsers")) || {};
+    return new Set(Object.keys(onlineUsers));
+  }
+
+  
+  const onlineUsers = JSON.parse(localStorage.getItem("onlineUsers")) || {};
+  onlineUsers[currentUser.email] = {
+    email: currentUser.email,
+    name: currentUser.email,
+    timestamp: Date.now()
+  };
+
+  localStorage.setItem("onlineUsers", JSON.stringify(onlineUsers));
+  renderSidebar();
+  }
+  document.querySelector('.current-user-email').innerText = currentUser.email;
+  sessionStorage.setItem(currentUser.email, 'online');
 
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       sessionStorage.removeItem("currentUser");
       sessionStorage.removeItem(currentUser.email);
+
+      const onlineUsers = JSON.parse(localStorage.getItem("onlineUsers")) || {};
+      delete onlineUsers[currentUser.email];
+      localStorage.setItem("onlineUsers", JSON.stringify(onlineUsers));
       window.location.href = "../index.html";
     });
   }
@@ -306,4 +335,3 @@ window.onload = () => {
   }
 
   renderMessages();
-};

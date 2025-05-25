@@ -2,7 +2,7 @@ const loginBtn = document.getElementById('show-login');
 const registerBtn = document.getElementById('show-register');
 const loginForm = document.getElementById('login-toggle');
 const registerForm = document.getElementById('register-toggle');
-
+const users = JSON.parse(localStorage.getItem('users')) || [];
 const showToast = (message, type='success') => {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
