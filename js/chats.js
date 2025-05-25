@@ -16,7 +16,7 @@ const groupMembersDiv = document.getElementById('group-members');
 const confirmGroupBtn = document.getElementById('confirm-group');
 const cancelGroupBtn = document.getElementById('cancel-group');
 
-// ==================== Globals ====================
+
 let typingTimeout;
 let currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
 let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
@@ -24,24 +24,23 @@ let users = [];
 let contacts = [];
 let selectedContact = null;
 
-// ==================== Utility Functions ====================
-function getTimes() {
+//first render function
+const getTimes = () => {
   const now = new Date();
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function autoCloseSidebarOnSmallScreen() {
+const autoCloseSidebarOnSmallScreen = () => {
   if (window.innerWidth <= 768) {
     messageList.classList.remove('show');
   }
 }
 
-function showTypingIndicator(message) {
+const showTypingIndicator = (message) => {
   typingIndicator.innerText = message;
 }
 
-// ==================== UI Render Functions ====================
-function renderChatHeader(name) {
+const renderChatHeader = (name) => {
   usernameDisplay.innerText = name;
 }
 
@@ -70,7 +69,7 @@ const renderMessages = () => {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function renderSidebar() {
+const renderSidebar = () => {
   sidebar.innerHTML = '';
   const filter = filterDropdown?.value || 'all';
 
@@ -255,7 +254,6 @@ confirmGroupBtn.addEventListener('click', () => {
   renderSidebar();
 });
 
-// ==================== Initialization ====================
 window.onload = () => {
   if (!currentUser) {
     window.location.href = "/index.html";

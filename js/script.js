@@ -17,7 +17,7 @@ registerBtn.addEventListener('click', () => {
     loginBtn.classList.remove('active');
 });
 
-async function hashPassword(password) {
+const hashPassword = async (password) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
