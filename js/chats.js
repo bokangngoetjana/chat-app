@@ -77,7 +77,7 @@ const renderSidebar = () => {
   const onlineUsers = JSON.parse(localStorage.getItem('onlineUsers')) || {};
   const onlineSet = new Set(Object.keys(onlineUsers));
 
-  const filteredContacts = users.filter(user => user.email !== currentUser)
+  const filteredContacts = users.filter(user => user.email !== currentUser.email)
   .map(user => ({
     name: user.firstName,
     email: user.email,
