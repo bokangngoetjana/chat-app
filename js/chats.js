@@ -1,4 +1,3 @@
-// ==================== DOM Elements ====================
 const submitBtn = document.getElementById('submit-btn');
 const messageInput = document.getElementById('message-input');
 const chatMessages = document.getElementById('chat-messages');
@@ -17,7 +16,7 @@ const groupMembersDiv = document.getElementById('group-members');
 const confirmGroupBtn = document.getElementById('confirm-group');
 const cancelGroupBtn = document.getElementById('cancel-group');
 
-// ==================== Globals ====================
+
 let typingTimeout;
 let currentUser = JSON.parse(sessionStorage.getItem("currentUser"));
 let allChats = JSON.parse(localStorage.getItem('allChats')) || {};
@@ -25,28 +24,27 @@ let users = [];
 let contacts = [];
 let selectedContact = null;
 
-// ==================== Utility Functions ====================
-function getTimes() {
+//first render function
+const getTimes = () => {
   const now = new Date();
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function autoCloseSidebarOnSmallScreen() {
+const autoCloseSidebarOnSmallScreen = () => {
   if (window.innerWidth <= 768) {
     messageList.classList.remove('show');
   }
 }
 
-function showTypingIndicator(message) {
+const showTypingIndicator = (message) => {
   typingIndicator.innerText = message;
 }
 
-// ==================== UI Render Functions ====================
-function renderChatHeader(name) {
+const renderChatHeader = (name) => {
   usernameDisplay.innerText = name;
 }
 
-function renderMessages() {
+const renderMessages = () => {
   if (!selectedContact) {
     chatMessages.innerHTML = '<p style="text-align:center; color:#888;">Select a chat to start messaging</p>';
     return;
@@ -68,11 +66,10 @@ function renderMessages() {
     `;
     chatMessages.appendChild(msgDiv);
   });
-
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function renderSidebar() {
+const renderSidebar = () => {
   sidebar.innerHTML = '';
   const filter = filterDropdown?.value || 'all';
 
@@ -127,7 +124,8 @@ function renderSidebar() {
   });
 }
 
-// ==================== Event Handlers ====================
+
+
 toggleSidebarBtn.addEventListener('click', () => {
   messageList.classList.toggle('show');
 });
@@ -207,7 +205,7 @@ window.addEventListener("storage", (event) => {
   }
 });
 
-// ==================== Group Chat Modal ====================
+//Group Chat Modal 
 createGroupBtn.addEventListener('click', () => {
   groupNameInput.value = '';
   groupMembersDiv.innerHTML = '';
@@ -256,7 +254,6 @@ confirmGroupBtn.addEventListener('click', () => {
   renderSidebar();
 });
 
-// ==================== Initialization ====================
 window.onload = () => {
   if (!currentUser) {
     window.location.href = "/index.html";

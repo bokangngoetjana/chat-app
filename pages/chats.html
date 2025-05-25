@@ -13,8 +13,23 @@
                         <option value="all">All Users</option>
                         <option value="online">Online Only</option>
                     </select>
-                        <a href="./profile.html"><label id="profileIcon" class="user-profile">Profile</label></a>
-                        <button id="create-group-btn">Create Group</button>
+
+                        <div class="sidebar-actions">
+                            <a href="./profile.html" class="action-button">
+                                <i class="fa-solid fa-user"></i>
+                                <span>Profile</span>
+                            </a>
+                            <button id="create-group-btn" class="action-button">
+                                <i class="fa-solid fa-square-plus"></i>
+                                <span>Create</span>
+                         </button>
+                            <button class="action-button" id="logoutBtn">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+
+
                 </div>
                 <div class="sidebar" id="sidebar">
                     
@@ -28,7 +43,6 @@
                         <p>online</p>
                     </div>
                     <div class="side-details">
-                        <button id="logoutBtn">Logout</button>
                     </div>
                 </div>
 
@@ -57,6 +71,7 @@
 </div>
 
         <script src="../js/chats.js"></script>
+        <script src="https://kit.fontawesome.com/3f807a17b6.js" crossorigin="anonymous"></script>
     </body>
     <footer>
         
