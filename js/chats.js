@@ -91,11 +91,11 @@ const renderSidebar = () => {
     const item = document.createElement('div');
     item.classList.add('message-item');
     item.innerHTML = `
-      <img src="../assets/profile1.jpg" alt="Avatar" class="profile-img" />
+      <i class="fa-solid fa-user profile-icon"></i>
       <div class="message-content">
         <div class="message-header">
           <h4>${contact.name} ${contact.online ? '<span style="color:green;">●</span>' : ''}</h4>
-          <span>12:15</span>
+          
         </div>
         <p>Tap to open chat</p>
       </div>
@@ -115,7 +115,7 @@ const renderSidebar = () => {
       const item = document.createElement('div');
       item.classList.add('message-item');
       item.innerHTML = `
-        <img src="assets/group-icon.png" alt="Group Icon" />
+        <i class="fa-solid fa-users profile-icon"></i>
         <div class="message-content">
           <div class="message-header">
             <h4>${group.name}</h4>
@@ -282,7 +282,7 @@ window.onload = () => {
     users = [];
   }
 
-  //populate users for group selection
+  //populate users
   contacts = users.filter(user => user.email !== currentUser.email).map(user => ({
     email: user.email,
     name: user.firstName
